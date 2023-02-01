@@ -1,21 +1,17 @@
 package com.example.Mock1.Data;
 
-public class User {
+public class SqlToJmeter {
     private String login;
     private String password;
     private String email;
     private String date;
-    public User() {}
+    public SqlToJmeter() {}
 
-    public User(String login, String password, String email) {
+    public SqlToJmeter(String login, String password, String email) {
         this.login = login;
         this.password = password;
         this.email = email;
 
-    }
-    public User(String login, String date) {
-        this.login = login;
-        this.date = date;
     }
 
     public String getLogin() {
@@ -36,5 +32,4 @@ public class User {
         this.email = email;
     }
     public void setDate(String date) {this.date = date;}
-
 }

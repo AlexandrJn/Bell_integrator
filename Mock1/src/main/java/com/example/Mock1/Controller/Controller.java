@@ -1,33 +1,41 @@
 package com.example.Mock1.Controller;
 
-import com.example.Mock1.Data.ServiceException;
-import com.example.Mock1.Data.User;
-import com.example.Mock1.Data.UserService;
+import com.example.Mock1.Data.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.concurrent.locks.ReentrantLock;
 
 
 @RestController
-public class Controller {
-    private final UserService userService;
+public class Controller{
 
-    public Controller(UserService userService) {
-        this.userService = userService;
+    private final JmeterService jmeterService;
+
+    public Controller(JmeterService jmeterService) {
+        this.jmeterService = jmeterService;
     }
 
     @GetMapping("/home")
-    public User getUser() {
-        return new User("jojo","bean", "33", "Neville");
+    public ResponseEntity<?> getFromJmeter(@RequestParam String login) throws Exception{
+        try {
+            JDBCPostgres methodSelect = new JDBCPostgres();
+            methodSelect.driverJdbcPostgres();
+            methodSelect.select(login);
+            return ResponseEntity.ok("Select OK");
+        } catch (ServiceException getException) {
+            return ResponseEntity.badRequest().body(getException.getMessage());
+        }
     }
 
     @PostMapping("/home")
-    public ResponseEntity<?> postUser(@RequestBody User receivedUser) {
+    public ResponseEntity<?> postUser(@RequestBody User receivedFromJmeter) throws Exception{
         try {
-            return ResponseEntity.ok(userService.getUserWithDate(receivedUser));
-        } catch (ServiceException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            JDBCPostgres methodInsert = new JDBCPostgres();
+            methodInsert.driverJdbcPostgres();
+            methodInsert.insert(receivedFromJmeter.getLogin(), receivedFromJmeter.getPassword(), receivedFromJmeter.getEmail());
+            return ResponseEntity.ok("Insert OK");
+        } catch (ServiceException postException) {
+            return ResponseEntity.internalServerError().body(postException.getMessage());
         }
     }
 }
