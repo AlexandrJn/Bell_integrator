@@ -1,41 +1,43 @@
 package com.example.Mock1.Controller;
 
-import com.example.Mock1.Data.*;
-import org.springframework.http.ResponseEntity;
+import com.example.Mock1.Data.User;
 import org.springframework.web.bind.annotation.*;
+import com.example.Mock1.Data.JDBCPostgres;
 
 
 
 @RestController
 public class Controller{
 
-    private final JmeterService jmeterService;
-
-    public Controller(JmeterService jmeterService) {
-        this.jmeterService = jmeterService;
-    }
-
-    @GetMapping("/home")
-    public ResponseEntity<?> getFromJmeter(@RequestParam String login) throws Exception{
+    @GetMapping("/home/{login}")
+    public User getUser(@PathVariable String login) throws Exception{
+        User user = new User();
+        JDBCPostgres jdbcPostgres = new JDBCPostgres();
         try {
-            JDBCPostgres methodSelect = new JDBCPostgres();
-            methodSelect.driverJdbcPostgres();
-            methodSelect.select(login);
-            return ResponseEntity.ok("Select OK");
-        } catch (ServiceException getException) {
-            return ResponseEntity.badRequest().body(getException.getMessage());
+            user = jdbcPostgres.select(login);
+            if (user.getLogin() == null || user.getLogin().isEmpty()){
+                throw new JDBCPostgres.ServiceExceptionGet();
+            }
+
+        } catch (JDBCPostgres.ServiceExceptionGet e) {
+            throw new JDBCPostgres.ServiceExceptionGet();
         }
+        return user;
     }
 
     @PostMapping("/home")
-    public ResponseEntity<?> postUser(@RequestBody User receivedFromJmeter) throws Exception{
+    public String postUser(@RequestBody User user1) throws Exception{
+        String result = new String();
+        JDBCPostgres jdbcPostgres = new JDBCPostgres();
         try {
-            JDBCPostgres methodInsert = new JDBCPostgres();
-            methodInsert.driverJdbcPostgres();
-            methodInsert.insert(receivedFromJmeter.getLogin(), receivedFromJmeter.getPassword(), receivedFromJmeter.getEmail());
-            return ResponseEntity.ok("Insert OK");
-        } catch (ServiceException postException) {
-            return ResponseEntity.internalServerError().body(postException.getMessage());
+            if (user1.getLogin()==null){
+                throw new JDBCPostgres.ServiceExceptionPost();
+            }
+            result = jdbcPostgres.insert(user1.getLogin(), user1.getPassword(), user1.getEmail());
+            return result;
+        } catch (JDBCPostgres.ServiceExceptionPost e1) {
+            throw new JDBCPostgres.ServiceExceptionPost();
         }
+
     }
 }
